@@ -2,13 +2,15 @@ const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const cors = require('cors');
+const path = require("path");
 const portfolioRoutes = require("../backend/routes/portfolio");
 dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
 connectDB();
-app.use("/uploads", express.static("uploads"));
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use("/api", portfolioRoutes);
 

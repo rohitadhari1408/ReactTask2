@@ -4,16 +4,16 @@ const multer = require("multer");
 const upload = require('../middleware/upload');
 const {
   createOrUpdatePortfolio,
-  uploadPortfolio,
+
   getPortfolios,
   getPortfolioById,
   updatePortfolio
 
 } = require("../controller/portfolioController");
 
-router.post("/portfolios", uploadPortfolio, createOrUpdatePortfolio);
+router.post("/portfolios", upload.fields([{ name: "profileImage", maxCount: 1 }, { name: "projectImages", maxCount: 10 }]), createOrUpdatePortfolio);
 router.get("/portfolios", getPortfolios);
 router.get("/portfolios/:id", getPortfolioById);
-router.put("/portfolios/:id", uploadPortfolio, updatePortfolio);
+router.patch("/portfolios/:id", upload.fields([{ name: "profileImage", maxCount: 1 }, { name: "projectImages", maxCount: 10 }]), updatePortfolio);
 
 module.exports = router;

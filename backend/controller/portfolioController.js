@@ -1,11 +1,7 @@
 const Portfolio = require("../model/Portfolio");
 
 
-const multer = require("multer");
 
-// Use memoryStorage (or configure diskStorage if you want to save to disk)
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 
 
@@ -31,6 +27,7 @@ exports.getPortfolioById = async (req, res) => {
 exports.updatePortfolio = async (req, res) => {
   try {
     const { id } = req.params;
+
     const {
       name,
       title,
@@ -42,7 +39,7 @@ exports.updatePortfolio = async (req, res) => {
       socials,
       skills,
       services,
-      projects,
+      projects, // this maps to portfolio
       testimonials,
       blog,
       contactMessage,
@@ -51,15 +48,17 @@ exports.updatePortfolio = async (req, res) => {
       template,
     } = req.body;
 
+    // Conditionally get uploaded file name
     const profileImage = req.file ? req.file.filename : undefined;
 
+    // Build update payload
     const updatedData = {
       template,
       hero: {
         name,
         title,
         tagline,
-        profileImage,
+        ...(profileImage && { profileImage }), // Only include if file uploaded
       },
       about: {
         bio,
@@ -80,11 +79,7 @@ exports.updatePortfolio = async (req, res) => {
       },
     };
 
-    // Remove undefined image field if no new file uploaded
-    if (!profileImage) {
-      delete updatedData.hero.profileImage;
-    }
-
+    // Perform update
     const updatedPortfolio = await Portfolio.findByIdAndUpdate(id, updatedData, {
       new: true,
       runValidators: true,
@@ -94,7 +89,7 @@ exports.updatePortfolio = async (req, res) => {
       return res.status(404).json({ success: false, error: "Portfolio not found" });
     }
 
-    return res.status(200).json({ success: true, portfolio: updatedPortfolio });
+    return res.status(200).json({ success: true, data: updatedPortfolio });
   } catch (err) {
     console.error("Update Error:", err);
     return res.status(500).json({ success: false, error: "Server error" });
@@ -123,8 +118,11 @@ exports.createOrUpdatePortfolio = async (req, res) => {
       template,
     } = req.body;
 
-    const profileImage = req.file?.filename || ""; // Assuming you're using multer with diskStorage
+    // const profileImage = req.file?.filename || "";
+    const profileImage = req.files?.profileImage?.[0]?.filename || "";
 
+ // Assuming you're using multer with diskStorage
+console.log("Received profileImage:", profileImage);
     // --- Validate required fields ---
     if (!name || !title || !tagline || !template) {
       return res.status(400).json({
@@ -195,9 +193,5 @@ function parseJSON(input, fallback) {
 }
 
 
-exports.uploadPortfolio = upload.fields([
-  { name: 'profileImage', maxCount: 1 },
-  { name: 'projectImages', maxCount: 10 }
-]);
 
 

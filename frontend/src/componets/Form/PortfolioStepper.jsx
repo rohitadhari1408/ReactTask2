@@ -184,7 +184,7 @@ const handleStepSubmit = async (data, step) => {
 } else {
       const id = localStorage.getItem("portfolioId");
       if (!id) throw new Error("Portfolio ID not found.");
-      await axios.put(`${API_BASE_URL}/portfolios/${id}`, formData);
+      await axios.patch(`${API_BASE_URL}/portfolios/${id}`, formData);
     }
   } catch (err) {
     console.error(`Step ${step} failed:`, err);
